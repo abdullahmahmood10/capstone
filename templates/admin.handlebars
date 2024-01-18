@@ -1,0 +1,623 @@
+<html>
+
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet'>
+    <title>AdvisaGenius</title>
+    <link rel="icon" href="/static/advisaGeniusLogo.png" type="image/x-icon">
+    <style>
+        body{
+            font-family: 'Lato';
+        }
+        .banner-container {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            background-image: linear-gradient(#ebebeb , #0056B8);
+            grid-template-columns: 1fr;
+            grid-template-areas: logo
+                bcontent;
+            height: 63%;
+        }
+
+        .logo-container {
+            display: grid;
+            grid-area: logo;
+            grid-template-columns: 20% 50% 30%;
+            grid-template-areas: "img empty profile";
+        }
+
+        .logo-img {
+            grid-area: img;
+
+        }
+
+        .logo-img img {
+            width: 100%;
+        }
+
+        .logo-empty {
+            grid-area: empty;
+        }
+
+        .profile-area {
+            display: grid;
+            grid-area: profile;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .profile nav {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .profile .profile-userpic {
+            width: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 30px;
+        }
+
+        .profile .sub-menu-wrap {
+            position: absolute;
+            top: 100%;
+            right: 16%;
+            width: 320px;
+            max-height: 0px;
+            overflow: hidden;
+            transition: max-height 0.5s;
+        }
+
+        .profile .sub-menu-wrap.open-menu {
+            max-height: 400px;
+        }
+
+        .profile .sub-menu {
+            background: #fff;
+            padding: 20px;
+            margin: 10px;
+        }
+        .profile .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .profile .user-info h3 {
+            font-weight: 500;
+        }
+        .profile .user-info img {
+            width: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .sub-menu hr {
+            border: 0;
+            height: 1px;
+            width: 100%;
+            background: #ccc;
+            margin: 15px 0 10px;
+        }
+
+        .profile .sub-menu .sub-menu-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #525252;
+            margin: 12px 0;
+        }
+
+        .profile .sub-menu .sub-menu-link p {
+            width: 100%;
+        }
+
+        .profile .sub-menu .sub-menu-link img {
+            width: 40px;
+            border-radius: 50%;
+            padding: 8px;
+            margin-right: 15px;
+        }
+
+        .profile .sub-menu .sub-menu-link span {
+            font-size: 22px;
+        }
+
+        .profile .sub-menu-link:hover span {
+            transform: translateX(5px);
+        }
+
+        .profile .sub-menu-link:hover p {
+            font-weight: 600;
+        }
+
+        .banner-content {
+            grid-area: 'bcontent';
+            display: grid;
+            grid-template-columns: 4fr;
+            grid-template-areas: "txt txt img img";
+        }
+
+        .content-text {
+            grid-area: 'txt';
+            padding: 10px;
+            margin: 0 0 0 15%;
+        }
+
+        .content-img {
+            grid-area: 'img';
+            padding: 10px;
+        }
+
+        .banner-image {
+            width: 45%;
+        }
+
+        .grabberHeading p {
+            color: #fff;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .grabberText p {
+            color: #fff;
+            font-size: 25px;
+            margin: -10 0 15 15;
+        }
+
+        .banner-btn {
+            width: 200px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 20px;
+            margin: 0 0 0 15;
+            border: solid 2px #fff;
+            background-color: transparent;
+            color: #fff;
+        }
+
+        .banner-btn:hover {
+            background-color: #004493;
+        }
+
+         .banner-btn:active {
+            background-color: #0056B8;
+        }
+
+        .curvebox {
+            height: 60%;
+            display: grid;
+            justify-items: center;
+            background-color: #fff;
+            grid-template-columns: 1fr;
+            grid-template-areas: "curvebox up"
+                "info"
+                "curvebox down";
+
+
+        }
+
+        .curvebox-up {
+            grid-area: 'curvebox up';
+            width: 100%;
+            background-color: #0056B8;
+            border-radius: 0 0 50% 50%;
+
+        }
+
+        .curvebox-info {
+            grid-area: 'info';
+            height: 100%;
+            width: 65%;
+        }
+
+        .curvebox-down {
+            grid-area: 'curvebox up';
+            width: 100%;
+            background-color: #0056B8;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .curvebox-h1,
+        .curvebox-p {
+            text-align: center;
+            color: #808080;
+        }
+        .curvebox-h1{
+            font-size: 25px;
+        }
+        .curvebox-p {
+            font-size: 20px;
+        }
+
+        .featurescontainer {
+            display: grid;
+            justify-items: center;
+            padding: 0 25px;
+            background-color: #0056B8;
+            grid-template-columns: 1fr;
+            grid-template-areas: "features-h1"
+                "features-info";
+        }
+
+        .features-h1 {
+            grid-area: 'features-h1';
+            justify-self: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .features-h1 h1{
+            margin-top: 0;
+            font-size: 25px;
+        }
+
+        .features-info {
+            display: grid;
+            grid-gap: 25px;
+            grid-template-columns: repeat(1fr);
+            grid-template-areas: "easy powerful instant";
+            color: #fff;
+        }
+        .easybox, .powerfulbox, .instantbox {
+            background-color: #0056B8;
+            border: solid 2px #fff;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .inside-header {
+            display: flex;
+            align-items: center;
+            background-color: #0056B8;
+            width: 100%;
+            margin: auto;
+            justify-content: center;
+        }
+        .inside-header img{
+            width: 20%;
+            margin-right: 10px;
+        }
+        .inside-header span {
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .chat-container {
+            display: grid;
+            background-image: linear-gradient(#0056B8, #ebebeb);
+            height: 100%;
+        }
+        .chat-h1 {
+            grid-area: 'chat-h1';
+            justify-self: center;
+            color: #fff;            
+            margin: 40px 0 10px 20px;
+        }
+        .chat-h1 h1{
+            font-size: 25px;
+        }
+        .chat-top {
+            display: grid;
+            width: 50%;
+            height: 100px;
+            justify-self: center;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            background-color: #7EA8D6;
+        }
+        .chat-center {
+            display: flex;
+            align-items: center;
+            margin: auto;
+            padding-bottom: 20px;
+        }
+        .chat-center img{
+            width: 50px; 
+            height: auto; 
+            margin-right: 10px; 
+        }
+        .chat-center span {
+            color: #fff;
+            font-size: 30px;
+        }
+        .chat-box {
+            background-color: #f7f7f7;
+            width: 50%;
+            margin: -25px 0 20px 0;
+            justify-self: center;
+            border-radius: 20px;
+        }
+        #chat {
+            padding: 10px;
+            height: 320px;
+            overflow-y: auto;            
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        .message.right {
+            background-color: #d3d1d1; 
+            justify-content: flex-end;
+            text-align: left; 
+            box-sizing: border-box;
+
+        }
+
+        .message.left {
+            background-color: #d3d1d1;
+            text-align: left;
+            box-sizing: border-box;
+
+        }
+
+        #user-input-container {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 5px 10px;
+            background-color: #d3d1d1;
+            border:none;
+            margin-left: 20px;
+            margin-right: 5px;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 5px;
+            background-color: #ffffff;
+            border: 2px solid #0056B8;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        button img {
+            width: 30px;
+            height: 30px;
+        }
+        footer {
+            background-color: #0056B8;
+            color: #ffffff;
+            padding: 0px 30px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="banner-container">
+
+        <div class="logo-container">
+            <div class="logo-img"><img src="../static/advisaGeniusLogo6.png" alt="Genie Logo"></div>
+            <div class="logo-empty"></div>
+
+            <div class="profile-area">
+                <div class="profile">
+                    <nav>
+                        <img src="../static/{{username}}.png" alt="display" class="profile-userpic" onclick="toggleMenu()">
+
+                        <div class="sub-menu-wrap" id="subMenu">
+                            <div class="sub-menu">
+                                <div class="user-info">
+                                    <img src="../static/{{username}}.png">
+                                    <h3>{{username}}</h3>
+                                </div>
+                                <hr>
+                                <a href="/logout" class="sub-menu-link">
+                                    <img src="../static/logout.png">
+                                    <p>Logout</p>
+                                </a>
+                            </div>
+
+                            <script>
+                                let subMenu =document.getElementById('subMenu');
+                                function toggleMenu() {
+                                    subMenu.classList.toggle('open-menu')
+                                }
+                            </script>
+                        </div>
+
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="banner-content">
+
+            <div class="content-text">
+                <div class="grabberHeading">
+                    <p>
+                        Your Genie for Academic Advice
+                    </p>
+                </div>
+                <div class="grabberText">
+                    <p>
+                        Chat Your Way to Success: Your <br>University Advising Genie
+
+                    </p>
+                </div>
+                <button class="banner-btn" id="scrollToChatButton">Chat with Genie! &#8628;</button>
+            </div>
+
+            <div class="content-img">
+                <img src="/static/bannerimage1.png" class="banner-image" alt="Robot Genie">
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="curvebox">
+        <div class="curvebox-up"></div>
+        <div class="curvebox-info"><br>
+            <h2 class="curvebox-h1">What is Advisa Genius?</h2>
+            <p class="curvebox-p">AdvisaGenius is an automated academic advising system utilizing Large Language Models
+                (LLMs) to provide instant, personalized solutions to students academic questions, aimed at improving
+                advising efficiency, reducing wait times, and enhancing student satisfaction.</p>
+        </div>
+        <div class="curvebox-down"></div>
+    </div>
+
+    <div class="featurescontainer">
+        <div class="features-h1">
+            <h1>Why is it Special?</h1>
+        </div>
+
+        <div class="features-info">
+            <div class="easybox">
+                <div class="inside-header">
+                    <img src="/static/response 1.png"><span>Easy To Use</span>
+                    
+                </div>
+
+                <p>Navigating AdvisaGenius is a breeze. With a user-friendly chat interface,
+                    students can quickly ask questions and receive immediate responses, ensuring
+                    a seamless experience for all academic inquiries.</p>
+            </div>
+
+            <div class="powerfulbox">
+                <div class="inside-header">
+                    <img src="/static/powerfuldesign.png">
+                    <span>Powerful Design</span>
+                </div>
+
+                <p>Our commitment to powerful design extends beyond aesthetics; it's an experience crafted to 
+                    leave lasting impression. We ensure that every user interaction is not just efficient 
+                    but a visually pleasing adventure.</p>
+            </div>
+
+            <div class="instantbox">
+                <div class="inside-header">
+                    <img src="/static/response 1.png">
+                    <span>Instant Response</span>
+                </div>
+                <p>In realm of AdvisaGenius, time is of essence. Immerse yourself in immediate knowledge with 
+                    our rapid response system. Our dedication to instant responses ensures your queries 
+                    receive real-time solutions.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-h1">
+            <h1>Chat with Genie: Your 24/7 Academic Advisor</h1>
+        </div>
+        <div class="chat-top">
+            <div class="chat-center">
+                <img src="/static/advisor-image.png" alt="chat icon"><span> Genie</span>
+            </div>
+        </div>
+        <div class="chat-box">
+            <div id="chat"></div>
+            <div id="user-input-container">
+            <input type="text" id="user-input" placeholder="Enter your message">
+            <button onclick="sendQuery()" id="send-button">
+                <img src="/static/sendButton.png" alt="Send">
+            </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendQuery() {
+            const userQuery = document.getElementById('user-input').value
+            const submitButton = document.getElementById('send-button')
+
+            submitButton.title = 'Send Message'
+            
+            if (userQuery === "") {
+                submitButton.disabled
+                return 
+            }
+            appendMessage('user', userQuery, 'right')
+
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: userQuery }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const advisorResponse = data.response;
+                appendMessage('advisor', advisorResponse, 'left');
+            })
+            .catch(error => console.error('Error sending query:', error))
+        }
+
+        function appendMessage(sender, message, alignment) {
+            const chatContainer = document.getElementById('chat')
+            const messageDiv = document.createElement('div')
+            messageDiv.className = `message ${alignment}`
+            if (alignment == 'right'){
+                messageDiv.innerHTML = `${message}  <img src="/static/${sender.toLowerCase()}-image.png" style="height:30px; width:30px; margin-left:10px;"alt="${sender}">`
+            }
+            else{
+                messageDiv.innerHTML = `<img src="/static/${sender.toLowerCase()}-image.png" style="height:30px; width:30px; margin-right:10px;"alt="${sender}">  ${message}`
+            }
+            chatContainer.appendChild(messageDiv)
+
+            // Clear user input after sending
+            document.getElementById('user-input').value = ''
+
+            // Scroll to the bottom to show the latest message
+            chatContainer.scrollTop = chatContainer.scrollHeight
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const scrollToChatButton = document.getElementById('scrollToChatButton')
+        const chatContainer = document.querySelector('.chat-container')
+
+        scrollToChatButton.addEventListener('click', function () {
+            // Calculate the distance from the top of the page to the chat container
+            const distanceToChat = chatContainer.offsetTop
+
+            // Use smooth scrolling to move to the chat container
+            window.scrollTo({
+                top: distanceToChat,
+                behavior: 'smooth'
+            })
+        })
+        })
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the chat container and user input element
+            const chatContainer = document.getElementById('chat')
+
+            // Add initial messages from the advisor
+            appendMessage('advisor', 'Hi, I am Genie!', 'left')
+            appendMessage('advisor', 'How may I help you?', 'left')
+
+        })
+
+    </script>
+
+    <footer>
+        <div class="left">
+            <h2 style="font-weight: normal; margin:5px 0px; ">Contact Us</h2>
+            <p style="margin: 5px 0px 10px 0px;">Email: <a href="mailto:abdullah@gmail.com" style="color: #ffffff; text-decoration: none;">abdullah@gmail.com</a></p>
+        </div>
+
+        <div class="right">
+            <p style="margin-top: 23;">&copy; All Rights Reserved Advisa Genius @ 2023</p>
+        </div>
+    </footer>
+</body>
+</html>
