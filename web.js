@@ -58,6 +58,7 @@ app.get('/user', async (req, res) => {
     }
     else {
         let sessionData = await business.getSessionData(sessionkey)
+        let user = await business.getUserDetails(sessionData.Data.username)
 
         if (!sessionData) {
             // If no session data is found, redirect to login with an error message
@@ -69,8 +70,9 @@ app.get('/user', async (req, res) => {
         } 
         else {
             // User is authorized, display welcome message
-            let name = sessionData.Data.username;
-            res.render('user', { layout: undefined, username: name });
+            let username = sessionData.Data.username;
+            let name = user.name;
+            res.render('user', { layout: undefined, username: username, name: name});
         }
     }
 })
@@ -83,6 +85,7 @@ app.get('/admin', async (req, res) => {
     }
     else {
         let sessionData = await business.getSessionData(sessionkey)
+        let user = await business.getUserDetails(sessionData.Data.username)
 
         if (!sessionData) {
             // If no session data is found, redirect to login with an error message
@@ -94,8 +97,9 @@ app.get('/admin', async (req, res) => {
         } 
         else {
             // User is authorized, display welcome message
-            let name = sessionData.Data.username;
-            res.render('admin', {layout:undefined, username: name})
+            let username = sessionData.Data.username;
+            let name = user.name;
+            res.render('admin', {layout:undefined, username: username, name: name})
         }
     } 
 })

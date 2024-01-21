@@ -32,12 +32,15 @@ async function terminateSession(key) {
     return await persistence.deleteSession(key)
 }
 
+async function getUserDetails(username) {
+    return await persistence.getUserDetails(username);
+}
 
 async function deleteSession(key) {
     await persistence.deleteSession(key)
 }
 module.exports = {
-    validateCredentials,
+    validateCredentials, getUserDetails,
     startSession, getSessionData, terminateSession,
     deleteSession
 }
