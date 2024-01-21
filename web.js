@@ -26,7 +26,6 @@ app.post('/login', async (req, res) => {
     let username = req.body.username
     let password = req.body.password
     let userType = await business.validateCredentials(username, password)
-    console.log(userType)
 
     if (userType) {
 
