@@ -14,7 +14,10 @@ app.use(urlencodedParser)
 app.use(cookieParser())
 app.use(bodyParser.json())
 
-app.get('/', (req,res) => {
+app.get('/', async (req,res) => {
+    let haha = "hahah"
+    let userId = "1234"
+    await business.saveChatHistory(userId, haha)
     res.render('login', {layout: undefined, message: req.query.message})
 })
 

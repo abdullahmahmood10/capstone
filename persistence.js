@@ -11,6 +11,7 @@ async function connectDatabase() {
         await client.connect()
         db = client.db('capstone')
         users = db.collection('users')
+        chatHistory = db.collection('chat_history')
         session = db.collection('sessiondata')
     }
 }
@@ -19,6 +20,11 @@ async function getUserDetails(username) {
     await connectDatabase()
     let user = await users.findOne({ username: username });
     return user;
+}
+
+async function saveChatHistory(userId, text) {
+    await connectDatabase()
+    await chatHistory.insertOne({ user_id: userId, chat: text});
 }
 
 async function saveSession(sessionKey, expiry, data) {
@@ -44,5 +50,7 @@ async function deleteSession(key) {
 
 
 module.exports = {
-    getUserDetails, saveSession, getSessionData, deleteSession
+    getUserDetails, saveSession, getSessionData, 
+    deleteSession,
+    saveChatHistory
 }

@@ -12,6 +12,10 @@ async function validateCredentials(username, password) {
     return undefined;
 }
 
+async function saveChatHistory(userId, text) {
+    await persistence.saveChatHistory(userId, text);
+}
+
 async function startSession(data) {
     let sessionKey = crypto.randomBytes(16).toString('hex')
     let expiry = new Date(Date.now() + 3 * 60 * 60 * 1000 ) // 3hr
@@ -42,5 +46,5 @@ async function deleteSession(key) {
 module.exports = {
     validateCredentials, getUserDetails,
     startSession, getSessionData, terminateSession,
-    deleteSession
+    deleteSession, saveChatHistory
 }
