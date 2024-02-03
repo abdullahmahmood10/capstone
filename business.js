@@ -5,8 +5,8 @@ const crypto = require('crypto')
 async function validateCredentials(username, password) {
     let user = await persistence.getUserDetails(username);
 
-    if (user && user.password === password) {
-    return user.accountType;
+    if (user && user.password == password) {
+        return user.accountType;
     }
 
     return undefined;
