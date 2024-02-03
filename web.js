@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const handlebars = require('express-handlebars')
 const cookieParser = require('cookie-parser')
 const business = require('./business')
+const OpenAI = require("openai");
 
 app = express()
 app.set('views', __dirname+"/templates")
@@ -117,29 +118,27 @@ app.get('/logout', async (req, res) => {
 
 app.post('/ask', async (req, res) => {
     const userQuery = req.body.query;
-
-
-    const cohere = new CohereClient({
-        token: "J47pJoOKMQ0rngZUJPTa4PTQZcuWbTkY7kjaJheT",
-    });
-
-    (async () => {
-      const chatStream = await cohere.chatStream({
-          chatHistory: [
-              { role: "USER", message: "I am a student in UDST" },
-              { role: "CHATBOT", message: "Hi, I am Genie your Academic Advisor. How can I help you?" }
-          ],
-          message: userQuery,
-      });
-      let response = ""
-      for await (const message of chatStream) {
-          if (message.eventType === "text-generation") {
-              response +=message.text 
-          }
-      }
-      res.json({ response: response });
-    })();
-  })
+    const openai = new OpenAI({ apiKey: "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" });
+    const completion = await openai.chat.completions.create({
+        messages: [{"role": "system", "content": `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
+                    You will help in calculating the GPA of the students.`},
+                  {"role": "user", "content": "Calculate My GPA"},
+                  {"role": "assistant", "content": `The formula for calculating the GPA is: 
+                  (Credits * Grades)/Credits. 
+                  If a student asks for calculating their GPA, please ask from them the grades and credit for each course. The grading criteria is:
+                  A   =     4
+                  B+ =     3.5
+                  B   =     3
+                  C+  =   2.5
+                  C   =   2
+                  D+  =   1.5
+                  D    =    1
+                  F    =   0`},
+            {"role": "user", "content": `${userQuery}`}],
+        model: "gpt-3.5-turbo",
+      });  
+    res.json({ response: completion.choices[0].message.content});
+})
 
 app.listen(8000, async() => {
     console.log("Application started")
