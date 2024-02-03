@@ -118,7 +118,7 @@ app.get('/logout', async (req, res) => {
 
 app.post('/ask', async (req, res) => {
     const userQuery = req.body.query;
-    const openai = new OpenAI({ apiKey: "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" });
+    const openai = new OpenAI({ apiKey: "" });
     const completion = await openai.chat.completions.create({
         messages: [{"role": "system", "content": `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
                     You will help in calculating the GPA of the students.`},
