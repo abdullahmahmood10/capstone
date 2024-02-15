@@ -7,7 +7,7 @@ let session = undefined
 
 async function connectDatabase() {
     if (!client) {
-        client = new mongodb.MongoClient('')
+        client = new mongodb.MongoClient('mongodb+srv://student:12class34@cluster0.jms5ja8.mongodb.net/')
         await client.connect()
         db = client.db('capstone')
         users = db.collection('users')
