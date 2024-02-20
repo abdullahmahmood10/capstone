@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const fs = require("fs/promises");
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -75,6 +76,16 @@ app.post('/api/ask', async (req, res) => {
   }
   
 })
+
+app.get('/api/speech', async(req,res)=>{
+  const client = new OpenAIClient(process.env.SPEECH_ENDPOINT, new AzureKeyCredential(process.env.SPEECH_API_KEY));
+  const deploymentName = process.env.OPENAI_MODEL_NAME;
+  const audio = await fs.readFile("");//Add the speech audio file here.
+  const result = await client.getAudioTranscription(deploymentName, audio,{ language: 'en' });
+
+  console.log(result.text);
+})
+
 
 app.listen(8000, async() => {
     console.log("Application started")
