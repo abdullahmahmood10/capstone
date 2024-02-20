@@ -6,6 +6,8 @@ const bodyParser = require('body-parser')
 require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const fs = require("fs/promises");
+const fileType = require('file-type');
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -51,7 +53,29 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/ask', async (req, res) => {
-  const userQuery = req.body.query;
+  let buffer = Buffer.from(req.body.file, 'base64');
+  let fileTypeResult = fileType(buffer);
+  let userQuery = ""
+  
+  if (fileTypeResult) {
+    const mime = fileTypeResult.mime;
+
+    if (mime.startsWith('audio')) {
+      // File is of audio type
+      userQuery = await speechToText(buffer);
+    } else if (mime.startsWith('image')) {
+      // File is of image type
+      userQuery = await imageToText(buffer);
+    } else {
+      // Unsupported file type
+      userQuery = req.body.query;
+    }
+  } else {
+    // Unable to determine file type
+    userQuery = req.body.query;
+  }
+
+
   const messages = [
     { role: "system", content: `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
     You will help in calculating the GPA of the students.` },
@@ -77,13 +101,23 @@ app.post('/api/ask', async (req, res) => {
   
 })
 
-app.get('/api/speech', async(req,res)=>{
+async function speechToText(){
   const client = new OpenAIClient(process.env.SPEECH_ENDPOINT, new AzureKeyCredential(process.env.SPEECH_API_KEY));
   const deploymentName = process.env.OPENAI_MODEL_NAME;
   const audio = await fs.readFile("");//Add the speech audio file here.
   const result = await client.getAudioTranscription(deploymentName, audio,{ language: 'en' });
+  if (result){
+    return result.text
+  }
+  return undefined
+}
 
-  console.log(result.text);
+async function imageToText(){
+ 
+}
+
+app.get('/api/speech', async (req,res) => {
+  console.log('iski zaroorath nai')
 })
 
 
