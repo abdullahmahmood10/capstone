@@ -1,18 +1,18 @@
 const mongodb = require('mongodb')
+const { MONGODB_URI } = require('./config');
 
 let client = undefined
 let db = undefined
 let users = undefined
-let session = undefined
+let chatHistory = undefined;
 
 async function connectDatabase() {
     if (!client) {
-        client = new mongodb.MongoClient('mongodb+srv://student:12class34@cluster0.jms5ja8.mongodb.net/')
+        client = new mongodb.MongoClient(MONGODB_URI)
         await client.connect()
         db = client.db('capstone')
         users = db.collection('users')
-        chatHistory = db.collection('chat_history')
-        session = db.collection('sessiondata')
+        chatHistory = db.collection('chatHistory')
     }
 }
 
@@ -22,35 +22,25 @@ async function getUserDetails(username) {
     return user;
 }
 
-async function saveChatHistory(userId, text) {
-    await connectDatabase()
-    await chatHistory.insertOne({ user_id: userId, chat: text});
+async function saveChatHistory(username, sender, text) {
+    await connectDatabase();
+    await chatHistory.updateOne(
+        { username: username, ended: false },
+        { $push: { messages: { sender: sender, text: text } } },
+        { upsert: true }
+    );
 }
 
-async function saveSession(sessionKey, expiry, data) {
-    await connectDatabase()
-    let sessionData = {
-        SessionKey: sessionKey,
-        Expiry: expiry,
-        Data: data,
-      };
-    
-      await session.insertOne(sessionData);
-}
-
-async function getSessionData(key) {
-    await connectDatabase()
-    let session1 = await session.findOne({ SessionKey: key });
-    return session1;
-}
-
-async function deleteSession(key) {
-    await session.deleteOne({SessionKey: key });
+async function endConversation(username) {
+    await connectDatabase();
+    await chatHistory.updateOne(
+        { username: username, ended: false },
+        { $set: { ended: true } }
+    );
 }
 
 
 module.exports = {
-    getUserDetails, saveSession, getSessionData, 
-    deleteSession,
-    saveChatHistory
+    getUserDetails, 
+    saveChatHistory, endConversation
 }

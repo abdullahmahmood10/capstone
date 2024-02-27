@@ -6,15 +6,10 @@ const bodyParser = require('body-parser')
 require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const fs = require("fs/promises");
-const fileType = require('file-type');
+const fileType = import('file-type');
 
 app.use(bodyParser.json());
 app.use(cors());
-
-
-
-
-
 
 
 app.post('/api/login', async (req, res) => {
@@ -23,58 +18,65 @@ app.post('/api/login', async (req, res) => {
   console.log(password)
   try {
     // Validate user credentials
-    let accountType = await business.validateCredentials(username, password);
+    let jwtToken = await business.validateCredentials(username, password);
 
-    if (accountType) {
-      // If credentials are valid, start a session and return session details
-      let sessionData = await business.startSession(username);
-      
-      res.cookie('sessionkey', sessionData.sessionKey)
-
-      res.status(200).json({
-        status: true,
-        message: 'Login successful',
-        accountType,
-        expiry: sessionData['expiry']
-      });
+    if (jwtToken) {
+      res.status(200).json({status: true, message: 'Login successful', jwtToken});
     } else {
-      res.status(401).json({
-        status: false,
-        message: 'Login failed. Invalid credentials.'
-      });
+      res.status(401).json({status: false, message: 'Login failed. Invalid credentials.'});
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      status: false,
-      message: 'Internal server error.'
-    });
+    res.status(500).json({status: false, message: 'Internal server error.'});
+  }
+});
+
+app.post('/api/update-or-verify-token', async (req, res) => {
+  console.log(req.body.token)
+  let verifiedToken = await business.verifyToken(req.body.token);
+  console.log(verifiedToken) 
+
+  try {
+    if (verifiedToken) {
+      let convoToken = await business.generateToken(verifiedToken)
+      console.log(convoToken)
+      res.status(200).json({status: true, message: 'verification successful', convoToken});
+    } else {
+      res.status(401).json({status: false, message: 'verification failed. Invalid login token.'});
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({status: false, message: 'Internal server error.'});
   }
 });
 
 app.post('/api/ask', async (req, res) => {
-  let buffer = Buffer.from(req.body.file, 'base64');
-  let fileTypeResult = fileType(buffer);
   let userQuery = ""
-  
-  if (fileTypeResult) {
-    const mime = fileTypeResult.mime;
+  let convoToken = await business.verifyToken(req.body.token)
 
-    if (mime.startsWith('audio')) {
-      // File is of audio type
-      userQuery = await speechToText(buffer);
-    } else if (mime.startsWith('image')) {
-      // File is of image type
-      userQuery = await imageToText(buffer);
-    } else {
-      // Unsupported file type
-      userQuery = req.body.query;
-    }
+  if (req.body.file) {
+    // If a file is provided, handle it (voice note, image, etc.)
+    let buffer = Buffer.from(req.body.file, 'base64');
+    let fileTypeResult = fileType(buffer);
+
+    if (fileTypeResult) {
+      const mime = fileTypeResult.mime;
+
+      if (mime.startsWith('audio')) {
+        userQuery = await speechToText(buffer);
+      } else if (mime.startsWith('image')) {
+        userQuery = await imageToText(buffer);
+      } else {
+        // Unsupported file type
+        userQuery = req.body.message;
+      }
+    } 
   } else {
     // Unable to determine file type
-    userQuery = req.body.query;
+    userQuery = req.body.message;
   }
 
+  await business.saveChatHistory(convoToken.username, 'user', userQuery);
 
   const messages = [
     { role: "system", content: `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
@@ -96,10 +98,31 @@ app.post('/api/ask', async (req, res) => {
   const deploymentId = process.env.OPENAI_MODEL_NAME;
   const result = await client.getChatCompletions(deploymentId, messages);
   for (const choice of result.choices) {
-    res.json({ llm_response: choice.message.content });
-  }
-  
+    const llmResponse = choice.message.content;
+    await business.saveChatHistory(convoToken.username, 'LLM', llmResponse);
+    res.json({ llm_response: llmResponse });
+  } 
 })
+
+app.post('/api/end-convo', async (req, res) => {
+  let verifiedToken = await business.verifyToken(req.body.token)
+
+  try {
+    if (verifiedToken) {
+      await business.endConversation(verifiedToken.username);
+      res.status(200).json({ status: true, message: 'Conversation ended successfully.' });
+    } else {
+      res.status(401).json({status: false, message: 'verification failed. Invalid login token.'});
+    }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ status: false, message: 'Internal server error.' });
+  }
+});
+
+async function textToText() {
+
+}
 
 async function speechToText(){
   const client = new OpenAIClient(process.env.SPEECH_ENDPOINT, new AzureKeyCredential(process.env.SPEECH_API_KEY));

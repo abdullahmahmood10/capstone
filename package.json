@@ -6,10 +6,12 @@
     "cohere-ai": "^7.6.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.3",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
     "file-type": "^19.0.0",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",
     "openai": "^4.26.0",
     "ws": "^8.16.0"

@@ -1,15 +1,32 @@
 const persistence = require('./persistence')
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('./config');
 const crypto = require('crypto')
-
 
 async function validateCredentials(username, password) {
     let user = await persistence.getUserDetails(username);
 
     if (user && user.password == hashPassword(password)) {
-        return user.accountType;
+        // Generate JWT token upon successful authentication
+        const token = jwt.sign({ username: user.username, accountType: user.accountType }, JWT_SECRET); // Never Expires
+        return token;
     }
 
     return undefined;
+}
+
+async function generateToken(verifiedToken) {
+    const token = jwt.sign({ username: verifiedToken.username, accountType: verifiedToken.accountType }, JWT_SECRET, { expiresIn: '30m' }); // expires in 1h
+    return token
+}
+
+function verifyToken(token) {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return decoded;
+    } catch (err) {
+        return null; // Token verification failed
+    }
 }
 
 function hashPassword(pass) {
@@ -19,39 +36,20 @@ function hashPassword(pass) {
     return hashedPass
 }
 
-async function saveChatHistory(userId, text) {
-    await persistence.saveChatHistory(userId, text);
+async function saveChatHistory(username, sender, text) {
+    await persistence.saveChatHistory(username, sender, text);
 }
 
-async function startSession(data) {
-    let sessionKey = crypto.randomBytes(16).toString('hex')
-    let expiry = new Date(Date.now() + 60 * 1000 ) // 3hr
-
-
-    await persistence.saveSession(sessionKey,expiry, data);
-
-    return {
-        sessionKey,
-        expiry}
-}
-
-async function getSessionData(key) {
-    return await persistence.getSessionData(key)
-}
-
-async function terminateSession(key) {
-    return await persistence.deleteSession(key)
+async function endConversation(username) {
+    await persistence.endConversation(username);
 }
 
 async function getUserDetails(username) {
     return await persistence.getUserDetails(username);
 }
 
-async function deleteSession(key) {
-    await persistence.deleteSession(key)
-}
 module.exports = {
-    validateCredentials, getUserDetails,
-    startSession, getSessionData, terminateSession,
-    deleteSession, saveChatHistory
+    validateCredentials, getUserDetails, 
+    verifyToken, generateToken, endConversation,
+    saveChatHistory
 }
