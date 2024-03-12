@@ -8,7 +8,7 @@ async function validateCredentials(username, password) {
 
     if (user && user.password == hashPassword(password)) {
         // Generate JWT token upon successful authentication
-        const token = jwt.sign({ username: user.username, accountType: user.accountType }, JWT_SECRET); // Never Expires
+        const token = jwt.sign({ username: user.username, accountType: user.accountType, fullName: user.fullName, major: user.major }, JWT_SECRET); // Never Expires
         return token;
     }
 
@@ -16,7 +16,7 @@ async function validateCredentials(username, password) {
 }
 
 async function generateToken(verifiedToken) {
-    const token = jwt.sign({ username: verifiedToken.username, accountType: verifiedToken.accountType }, JWT_SECRET, { expiresIn: '30m' }); // expires in 1h
+    const token = jwt.sign({ username: verifiedToken.username, accountType: verifiedToken.accountType }, JWT_SECRET, { expiresIn: '3h' }); // expires in 1h
     return token
 }
 
@@ -36,8 +36,12 @@ function hashPassword(pass) {
     return hashedPass
 }
 
-async function saveChatHistory(username, sender, text) {
-    await persistence.saveChatHistory(username, sender, text);
+async function saveChatHistory(username, sender, text, time) {
+    await persistence.saveChatHistory(username, sender, text, time);
+}
+
+async function getChatHistory(username) {
+    return await persistence.getChatHistory(username)
 }
 
 async function endConversation(username) {
@@ -49,7 +53,7 @@ async function getUserDetails(username) {
 }
 
 module.exports = {
-    validateCredentials, getUserDetails, 
+    validateCredentials, getUserDetails, getChatHistory,
     verifyToken, generateToken, endConversation,
     saveChatHistory
 }
