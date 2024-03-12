@@ -22,13 +22,18 @@ async function getUserDetails(username) {
     return user;
 }
 
-async function saveChatHistory(username, sender, text) {
+async function saveChatHistory(username, sender, text, time) {
     await connectDatabase();
     await chatHistory.updateOne(
         { username: username, ended: false },
-        { $push: { messages: { sender: sender, text: text } } },
+        { $push: { messages: { sender: sender, text: text, messageTime: time } } },
         { upsert: true }
     );
+}
+
+async function getChatHistory(username) {
+    await connectDatabase();
+    return await chatHistory.find({ username: username, ended: true }).toArray();
 }
 
 async function endConversation(username) {
@@ -41,6 +46,6 @@ async function endConversation(username) {
 
 
 module.exports = {
-    getUserDetails, 
+    getUserDetails, getChatHistory,
     saveChatHistory, endConversation
 }
