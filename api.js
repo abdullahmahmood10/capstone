@@ -17,6 +17,9 @@ ffmpeg.setFfmpegPath(ffmpegPath);  //added
 app.use(bodyParser.json());
 app.use(cors());
 
+app.get('/api/check', async (req, res) => {
+  return('hello')
+});
 
 app.post('/api/login', async (req, res) => {
   let { username, password } = req.body;
