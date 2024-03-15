@@ -1,7 +1,7 @@
 const persistence = require('./persistence')
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('./config');
-const crypto = require('crypto')
+
 
 async function validateCredentials(username, password) {
     let user = await persistence.getUserDetails(username);
