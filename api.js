@@ -11,7 +11,7 @@ const fs = require("fs"); //changed
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; //added
 const ffmpeg = require('fluent-ffmpeg'); //added
 
-ffmpeg.setFfmpegPath(ffmpegPath);  //added
+ffmpeg.setFfmpegPath(ffmpegPath);  //addedn
 
 
 app.use(bodyParser.json());
