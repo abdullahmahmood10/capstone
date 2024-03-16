@@ -1,6 +1,6 @@
 {
     "routes": [
-      { "source": "/api/(.*)", "destination": "/" }
+      { "src": "/api/(.*)", "dest": "/" }
     ]
   }
   
