@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/api/check', async (req, res) => {
-  return('hello')
+  res.send('hello')
 });
 
 app.post('/api/login', async (req, res) => {
