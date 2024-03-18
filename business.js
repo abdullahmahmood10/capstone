@@ -1,5 +1,6 @@
 const persistence = require('./persistence')
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { JWT_SECRET } = require('./config');
 
 
