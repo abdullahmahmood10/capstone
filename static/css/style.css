@@ -14,7 +14,7 @@ body{
 .logo-container {
     display: grid;
     grid-area: logo;
-    grid-template-columns: 20% 50% 30%;
+    grid-template-columns: 20% 50% 29%;
     grid-template-areas: "img empty profile";
 }
 
