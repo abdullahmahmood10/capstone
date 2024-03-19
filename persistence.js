@@ -25,7 +25,7 @@ async function getUserDetails(username) {
 async function saveChatHistory(username, sender, text, time) {
     await connectDatabase();
     await chatHistory.updateOne(
-        { username: username, ended: false },
+        { username: username },
         { $push: { messages: { sender: sender, text: text, messageTime: time } } },
         { upsert: true }
     );
@@ -33,19 +33,19 @@ async function saveChatHistory(username, sender, text, time) {
 
 async function getChatHistory(username) {
     await connectDatabase();
-    return await chatHistory.find({ username: username, ended: true }).toArray();
+    return await chatHistory.find({ username: username}).toArray();
 }
 
-async function endConversation(username) {
-    await connectDatabase();
-    await chatHistory.updateOne(
-        { username: username, ended: false },
-        { $set: { ended: true } }
-    );
-}
+// async function endConversation(username) {
+//     await connectDatabase();
+//     await chatHistory.updateOne(
+//         { username: username, ended: false },
+//         { $set: { ended: true } }
+//     );
+// }
 
 
 module.exports = {
     getUserDetails, getChatHistory,
-    saveChatHistory, endConversation
+    saveChatHistory
 }

@@ -71,15 +71,7 @@ app.post('/api/ask', async (req, res) => {
   let userQuery = ""
   let convoToken = business.verifyToken(req.body.token)
 
-  /* abdullah ka experiment
-  let previousChat = await business.getChatHistory(convoToken.username)
-  console.log(previousChat)
-  
-  for (c of previousChat){
-    for (k of c.messages){
-      console.log(k.text)
-    }
-  } */
+
 
   //change started from here
   // console.log('something recieved')
@@ -123,7 +115,13 @@ app.post('/api/ask', async (req, res) => {
   console.log(userQuery)
   console.log(req.body.time)
 
-  
+  let previousChat = await business.getChatHistory("60100820")
+    let chatHistory=""
+    for (c of previousChat){
+      for (k of c.messages){
+        chatHistory+=k.text+ "\n"
+      }
+    }
 
   const messages = [
     {
@@ -140,7 +138,8 @@ app.post('/api/ask', async (req, res) => {
     C   =   2
     D+  =   1.5
     D    =    1
-    F    =   0 `},
+    F    =   0 
+    ${chatHistory}`},
     { role: "user", content: `${userQuery}` },
   ];
   const client = new OpenAIClient(process.env.OPENAI_ENDPOINT, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -153,25 +152,22 @@ app.post('/api/ask', async (req, res) => {
   }
 })
 
-app.post('/api/end-convo', async (req, res) => {
-  let verifiedToken = await business.verifyToken(req.body.token)
+// app.post('/api/end-convo', async (req, res) => {
+//   let verifiedToken = await business.verifyToken(req.body.token)
 
-  try {
-    if (verifiedToken) {
-      await business.endConversation(verifiedToken.username);
-      res.status(200).json({ status: true, message: 'Conversation ended successfully.' });
-    } else {
-      res.status(401).json({ status: false, message: 'verification failed. Invalid login token.' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, message: 'Internal server error.' });
-  }
-});
+//   try {
+//     if (verifiedToken) {
+//       await business.endConversation(verifiedToken.username);
+//       res.status(200).json({ status: true, message: 'Conversation ended successfully.' });
+//     } else {
+//       res.status(401).json({ status: false, message: 'verification failed. Invalid login token.' });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ status: false, message: 'Internal server error.' });
+//   }
+// });
 
-async function textToText() {
-
-}
 
 async function speechToText(audioPath) {
   try {
@@ -195,9 +191,7 @@ async function imageToText() {
 
 }
 
-app.get('/api/speech', async (req, res) => {
-  console.log('iski zaroorath nai')
-})
+
 
 
 app.listen(8000, async () => {

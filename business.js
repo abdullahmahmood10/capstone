@@ -17,7 +17,7 @@ async function validateCredentials(username, password) {
 }
 
 async function generateToken(verifiedToken) {
-    const token = jwt.sign({ username: verifiedToken.username, accountType: verifiedToken.accountType }, JWT_SECRET, { expiresIn: '3h' }); // expires in 1h
+    const token = jwt.sign({ username: verifiedToken.username, accountType: verifiedToken.accountType }, JWT_SECRET); // expires in 1h
     return token
 }
 
@@ -45,9 +45,9 @@ async function getChatHistory(username) {
     return await persistence.getChatHistory(username)
 }
 
-async function endConversation(username) {
-    await persistence.endConversation(username);
-}
+// async function endConversation(username) {
+//     await persistence.endConversation(username);
+// }
 
 async function getUserDetails(username) {
     return await persistence.getUserDetails(username);
@@ -55,6 +55,6 @@ async function getUserDetails(username) {
 
 module.exports = {
     validateCredentials, getUserDetails, getChatHistory,
-    verifyToken, generateToken, endConversation,
+    verifyToken, generateToken,
     saveChatHistory
 }
