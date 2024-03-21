@@ -115,7 +115,7 @@ app.post('/api/ask', async (req, res) => {
   console.log(userQuery)
   console.log(req.body.time)
 
-  let previousChat = await business.getChatHistory("60100820")
+  let previousChat = await business.getChatHistory(convoToken.username)
     let chatHistory=""
     for (c of previousChat){
       for (k of c.messages){
