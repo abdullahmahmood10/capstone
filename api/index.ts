@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
-const business = require('./business')
+const business = require('../business')
 const cors = require('cors');
 const bodyParser = require('body-parser')
-require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
+//require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const fs = require("fs"); //changed
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; //added
