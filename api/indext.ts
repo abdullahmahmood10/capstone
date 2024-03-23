@@ -14,7 +14,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);  //added
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get("/", (req, res) => {res.send("Express on Vercel")});
+app.get("/hi", (req, res) => {res.send("Express on Vercel")});
 
 app.post('/api/login', async (req, res) => {
   let { username, password } = req.body;
@@ -193,7 +193,7 @@ async function imageToText() {
 
 
 
-app.listen(8000, async () => {
+app.listen(3000, async () => {
   console.log("Application started")
 })
 
