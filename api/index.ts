@@ -8,6 +8,7 @@ const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const fs = require("fs"); //changed
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; //added
 const ffmpeg = require('fluent-ffmpeg'); //added
+const path = require('path');
 
 
 ffmpeg.setFfmpegPath(ffmpegPath);  //added
@@ -83,9 +84,10 @@ app.post('/api/ask', async (req, res) => {
     // console.log('audio recieved')
     // console.log(req.body.audio)
     const buffer = Buffer.from(req.body.audio, 'base64');
-    fs.writeFileSync('temp.aac', buffer);
-    const inputPath = 'temp.aac';
-    const outputPath = 'output.mp3';
+    const tempFilePath = path.join('/tmp', 'temp.aac');
+    fs.writeFileSync(tempFilePath, buffer);
+    const inputPath = path.join('/tmp', 'temp.aac');
+    const outputPath = path.join('/tmp', 'output.mp3');
     await new Promise<void>((resolve, reject) => {
       ffmpeg()
         .input(inputPath)
