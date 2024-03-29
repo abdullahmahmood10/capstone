@@ -120,19 +120,9 @@ async function handleMessage(userQuery, chatHistory, ws,username) {
   const messages = [
     {
       role: "system", content: `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
-    You will help in calculating the GPA of the students. Your name is Genie.` },
+    You will help in GPA calculation, course selection, and schedule management of the students. Your name is Genie.` },
     {
-      role: "assistant", content: `The formula for calculating the GPA is: 
-    (Credits * Grades)/Credits. 
-    If a student asks for calculating their GPA, please ask from them the grades and credit for each course. The grading criteria is:
-    A   =     4
-    B+ =     3.5
-    B   =     3
-    C+  =   2.5
-    C   =   2
-    D+  =   1.5
-    D    =    1
-    F    =   0 
+      role: "assistant", content: `
     ${data}
     ${chatHistory}`},
     { role: "user", content: `${userQuery}` },
