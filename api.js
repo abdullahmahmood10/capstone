@@ -5,8 +5,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 require('dotenv').config({ path: './environment.env' }); // Load environment variables from .env file
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const WebSocket = require('ws');
 
-const fs = require("fs"); //changed
+const fs = require("fs/promises"); //changed
 
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; //added
 const ffmpeg = require('fluent-ffmpeg'); //added
@@ -67,55 +68,41 @@ app.post('/api/update-or-verify-token', async (req, res) => {
   }
 });
 
-app.post('/api/ask', async (req, res) => {
-  let userQuery = ""
-  let convoToken = business.verifyToken(req.body.token)
+const wss = new WebSocket.Server({ port: 8080 });
 
+wss.on('connection', async function connection(ws) {
+  ws.on('message', async function incoming(message) {
+    let data = JSON.parse(message)
+    let userQuery = ""
+    let convoToken = business.verifyToken(data.token)
+    if (data.audio) {
+      const buffer = Buffer.from(data.audio, 'base64');
+      await fs.writeFile('temp.aac', buffer);
+      const inputPath = 'temp.aac';
+      const outputPath = 'output.mp3';
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(inputPath)
+          .output(outputPath)
+          .on('end', () => {
+            // console.log('Conversion finished');
+            resolve();
+          })
+          .on('error', (err) => {
+            console.error('Error:', err);
+            reject(err);
+          })
+          .run();
+      });
+      userQuery = await speechToText(outputPath);
+      await business.saveChatHistory(convoToken.username, 'user', userQuery, data.time);
+    }else{
+      userQuery = data.message
+      await business.saveChatHistory(convoToken.username, 'user', userQuery, data.time);
+    }
 
-
-  //change started from here
-  // console.log('something recieved')
-  // console.log(req.body.audio)
-  // console.log(typeof req.body.audio)
-  // const buffer = Buffer.from(req.body.audio, 'base64');
-  // console.log(typeof buffer)
-
-  if (req.body.audio) {
-    // console.log('audio recieved')
-    // console.log(req.body.audio)
-    const buffer = Buffer.from(req.body.audio, 'base64');
-    fs.writeFileSync('temp.aac', buffer);
-    const inputPath = 'temp.aac';
-    const outputPath = 'output.mp3';
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(inputPath)
-        .output(outputPath)
-        .on('end', () => {
-          // console.log('Conversion finished');
-          resolve();
-        })
-        .on('error', (err) => {
-          console.error('Error:', err);
-          reject(err);
-        })
-        .run();
-    });
-    userQuery = await speechToText(outputPath);
-    console.log(userQuery)
-    await business.saveChatHistory(convoToken.username, 'user', userQuery, req.body.time);
-  } else {
-    // Unable to determine file type
-    userQuery = req.body.message;
-    await business.saveChatHistory(convoToken.username, 'user', userQuery, req.body.time);
-  }
-
-  //change ends from here
-
-  console.log(userQuery)
-  console.log(req.body.time)
-
-  let previousChat = await business.getChatHistory(convoToken.username)
+    
+    let previousChat = await business.getChatHistory(convoToken.username)
     let chatHistory=""
     for (c of previousChat){
       for (k of c.messages){
@@ -123,6 +110,13 @@ app.post('/api/ask', async (req, res) => {
       }
     }
 
+    await handleMessage(userQuery,chatHistory, ws,convoToken.username); // Handle incoming message
+  });
+});
+
+async function handleMessage(userQuery, chatHistory, ws,username) {
+  console.log(userQuery)
+  data = await fs.readFile('./testing-file-node.txt','utf8')
   const messages = [
     {
       role: "system", content: `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
@@ -139,18 +133,34 @@ app.post('/api/ask', async (req, res) => {
     D+  =   1.5
     D    =    1
     F    =   0 
+    ${data}
     ${chatHistory}`},
     { role: "user", content: `${userQuery}` },
   ];
+
+  // Create an OpenAI client
   const client = new OpenAIClient(process.env.OPENAI_ENDPOINT, new AzureKeyCredential(process.env.OPENAI_API_KEY));
   const deploymentId = process.env.OPENAI_MODEL_NAME;
-  const result = await client.getChatCompletions(deploymentId, messages);
-  for (const choice of result.choices) {
-    const llmResponse = choice.message.content;
-    await business.saveChatHistory(convoToken.username, 'LLM', llmResponse, new Date().toLocaleString());
-    res.json({ llm_response: llmResponse });
+  let llmResponse=""
+  try {
+    // Generate completion for each message
+    const events = await client.streamChatCompletions(deploymentId, messages);
+    for await (const event of events) {
+      for (const choice of event.choices) {
+          const delta = choice.delta?.content;
+          if (delta !== undefined) {
+            llmResponse+=delta
+            await new Promise(resolve => setTimeout(resolve, 50));
+            ws.send(delta)
+          }
+      }
+    }
+  } catch (error) {
+    console.error('Error processing message:', error);
   }
-})
+  ws.send("Message Finished!!@@")
+  await business.saveChatHistory(username, 'LLM', llmResponse, new Date().toLocaleString());
+}
 
 // app.post('/api/end-convo', async (req, res) => {
 //   let verifiedToken = await business.verifyToken(req.body.token)
@@ -173,7 +183,7 @@ async function speechToText(audioPath) {
   try {
     const client = new OpenAIClient(process.env.SPEECH_ENDPOINT, new AzureKeyCredential(process.env.SPEECH_API_KEY));
     const deploymentName = process.env.OPENAI_MODEL_NAME;
-    const audio = await fs.promises.readFile(audioPath);//Add the speech audio file here.
+    const audio = await fs.readFile(audioPath);//Add the speech audio file here.
 
     const result = await client.getAudioTranscription(deploymentName, audio, { language: 'en' });
     if (result) {
@@ -190,8 +200,6 @@ async function speechToText(audioPath) {
 async function imageToText() {
 
 }
-
-
 
 
 app.listen(8000, async () => {
