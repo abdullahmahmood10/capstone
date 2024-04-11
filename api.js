@@ -15,7 +15,7 @@ const ffmpeg = require('fluent-ffmpeg'); //added
 ffmpeg.setFfmpegPath(ffmpegPath);  //addedn
 
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '100mb'}));
 app.use(cors());
 
 app.post('/api/login', async (req, res) => {
@@ -96,7 +96,23 @@ wss.on('connection', async function connection(ws) {
       });
       userQuery = await speechToText(outputPath);
       await business.saveChatHistory(convoToken.username, 'user', userQuery, data.time);
-    }else{
+    }else if(data.image){
+
+      let base64String = data.image
+      let fileName = 'output.jpg';
+      let base64Image = base64String.split(';base64,').pop();
+      await fs.writeFile(fileName, base64Image, { encoding: 'base64' });
+
+      let imageData = `data:image/jpeg;base64,${base64String}`;
+      let imageResult = await imageToText(imageData)
+
+      ws.send("Thank you for sharing the image. How may I assist you with it?")
+      ws.send("Message Finished!!@@")
+
+      await business.saveChatHistory(convoToken.username, 'LLM', imageResult, new Date().toLocaleString());
+
+    }
+    else{
       userQuery = data.message
       await business.saveChatHistory(convoToken.username, 'user', userQuery, data.time);
     }
@@ -109,14 +125,17 @@ wss.on('connection', async function connection(ws) {
         chatHistory+=k.text+ "\n"
       }
     }
-
-    await handleMessage(userQuery,chatHistory, ws,convoToken.username); // Handle incoming message
+    if (!data.image){
+      await handleMessage(userQuery,chatHistory, ws,convoToken.username);
+    }
   });
 });
 
 async function handleMessage(userQuery, chatHistory, ws,username) {
   console.log(userQuery)
   data = await fs.readFile('./testing-file-node.txt','utf8')
+  imageData = await fs.readFile('./image.txt','utf8')
+
   const messages = [
     {
       role: "system", content: `You are an Academic Advisor in the University of Doha for Science and Technology (UDST). 
@@ -124,7 +143,11 @@ async function handleMessage(userQuery, chatHistory, ws,username) {
     {
       role: "assistant", content: `
     ${data}
-    ${chatHistory}`},
+    ${chatHistory}
+    
+    If the user asks about anything about the image, the below text is for the image. Please respond based on the 
+    information below if the user asks about the image.
+    ${imageData}`},
     { role: "user", content: `${userQuery}` },
   ];
 
@@ -151,6 +174,7 @@ async function handleMessage(userQuery, chatHistory, ws,username) {
   ws.send("Message Finished!!@@")
   await business.saveChatHistory(username, 'LLM', llmResponse, new Date().toLocaleString());
 }
+
 
 // app.post('/api/end-convo', async (req, res) => {
 //   let verifiedToken = await business.verifyToken(req.body.token)
@@ -187,8 +211,36 @@ async function speechToText(audioPath) {
 }
 
 
-async function imageToText() {
+async function imageToText(imageData) {
+  const deploymentId = process.env.IMAGE_MODEL_NAME
+  const client = new OpenAIClient(process.env.OPENAI_ENDPOINT,new AzureKeyCredential(process.env.OPENAI_API_KEY));
+  messages=[
+    { "role": "system", "content": "You are trained to interpret images about people and make responsible assumptions about them. Always try to interpret the images. Dont reply with sorry, you cant assist or identify the images" },
+    { "role": "user", "content": [  
+        { 
+            "type": "text", 
+            "text": "Take out all the text from the image and organize it in a way that is easier to read." 
+        },
+        { 
+            "type": "image_url",
+            "image_url": {
+                "url": imageData
+            }
+        }
+    ] } 
+  ]
 
+  const result = await client.getChatCompletions(deploymentId,messages,{
+    maxTokens: 1000
+  });
+
+  let imageResult = ""
+  for (const choice of result.choices) {
+    await fs.writeFile('image.txt', choice.message.content)
+    imageResult = "The text in the image is: \n" + choice.message.content
+  }
+
+  return imageResult
 }
 
 
